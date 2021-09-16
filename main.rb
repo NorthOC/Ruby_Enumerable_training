@@ -18,21 +18,21 @@ module Enumerable
 
       case self
       when Array
-       my_select_arr = []
+         my_select_arr = []
 
-       for item in self
-        if yield(item) == true
-        my_select_arr.push(item)
-        end
-       end
-       my_select_arr
+         for item in self
+          if yield(item) == true
+          my_select_arr.push(item)
+          end
+         end
+         my_select_arr
       when Hash
-       my_select_hash = {}
-       for key, value in self
-        if yield(key, value) == true
-        my_select_hash[key] = value
-        end
-       end
+         my_select_hash = {}
+         for key, value in self
+          if yield(key, value) == true
+          my_select_hash[key] = value
+          end
+         end
        my_select_hash
       end
 
@@ -157,6 +157,21 @@ module Enumerable
         end
         i
     end
+    
+    def my_map 
+     if block_given?
+        output_arr = []
+        for item in self
+            output_arr.push(yield(item))
+        end
+        output_arr
+     else
+       enumerator = self.to_enum(:my_map)
+     end
+    end
+    
+    def my_inject
+    end
 end
 
 numbers = [1, 2, 3, 4, 5]
@@ -203,4 +218,9 @@ p numbers.count {|x| x%2 == 0}
 p numbers.my_count {|x| x%2 == 0}
 
 
+puts "\n\nmy_map vs. map"
+p numbers.map {|x| x*2}
+p numbers.my_map {|x| x*2}
+p numbers.my_map { "cat" }
 
+puts "\n\nmy_inject vs. inject"
