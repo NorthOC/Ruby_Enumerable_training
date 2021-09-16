@@ -1,5 +1,6 @@
 module Enumerable
-#after going through the lambda/proc lesson, I still have no idea how to do it with lambdas/procs.
+#Each of my method is made standalone with conditionals and "for item in self" loops, meaning
+#that you could add each method independently to the Enumerable class, and it would work.
     def my_each
       for i, n in self
 	yield(i, n)
@@ -158,11 +159,16 @@ module Enumerable
         i
     end
     
-    def my_map 
-     if block_given?
+    def my_map(proc_arg = nil)
         output_arr = []
+     if block_given?
         for item in self
             output_arr.push(yield(item))
+        end
+        output_arr
+     elsif proc_arg.class == Proc
+        for item in self
+           output_arr.push(proc_arg.call(item))
         end
         output_arr
      else
@@ -170,15 +176,80 @@ module Enumerable
      end
     end
     
-    def my_inject
+    def my_inject(initial = nil, sym = nil)
+        if initial.is_a?(Integer) && sym == nil
+	  memo = initial
+          if block_given?
+	     for item in self
+             memo = yield(memo = memo, item)
+             end
+           end
+          return memo
+        elsif initial == nil
+            memo = self.pop()
+            if block_given?
+             for item in self
+             memo = yield(memo = memo, item)
+             end
+            end
+            return memo
+        elsif initial.class == Symbol
+              initial = initial.to_s
+              case initial
+                when "*"
+                  memo = 1
+             	 for item in self
+             	 memo = memo * item
+             	 end
+                when "/"
+                 memo = 1
+                 for item in self
+                 memo = memo / item
+                 end
+                when "+"
+                  memo = 0
+                 for item in self
+                 memo = memo + item
+                 end
+                else
+                  memo = 0
+                 for item in self
+                  memo = memo - item
+                 end
+              end
+            return memo
+        elsif sym.class == Symbol && initial.is_a?(Numeric)
+           memo = initial
+              case sym.to_s
+                when "*"
+             	 for item in self
+             	 memo = memo * item
+             	 end
+                when "/"
+                 for item in self
+                 memo = memo / item
+                 end
+                when "+"
+                 for item in self
+                 memo = memo + item
+                 end
+                else
+                 for item in self
+                  memo = memo - item
+                 end
+              end
+            return memo 
+         end
     end
 end
 
+def multiply_els(arr)
+	arr.inject(:*)
+end
 numbers = [1, 2, 3, 4, 5]
 hash = {monica: "girl", ron: "boy", stella: "girl"}
 
 puts "my_each vs. each"
-numbers = [1, 2, 3, 4, 5]
 puts ''
 numbers.my_each  { |item| print item }
 print ' '
@@ -222,5 +293,13 @@ puts "\n\nmy_map vs. map"
 p numbers.map {|x| x*2}
 p numbers.my_map {|x| x*2}
 p numbers.my_map { "cat" }
+my_proc = Proc.new {|thing| thing * 2}
+p numbers.my_map(my_proc)
 
 puts "\n\nmy_inject vs. inject"
+p numbers.inject {|sum, x| sum + x}
+p numbers.my_inject {|sum, x| sum + x}
+p numbers.my_inject(:+)
+p numbers.inject(1, :+)
+p numbers.my_inject(1, :+)
+p multiply_els([2,4,5])
